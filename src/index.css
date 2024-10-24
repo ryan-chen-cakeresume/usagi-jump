@@ -1,0 +1,19 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-size: 24px;
+  margin: 0;
+}
+
+button {
+  background-color: #462e31;
+  border: none;
+  border-radius: 24px;
+  color: white;
+  font-size: 24px;
+  margin: 0;
+  outline: none;
+  padding: 4px 16px;
+}
