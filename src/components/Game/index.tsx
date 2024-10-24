@@ -52,13 +52,20 @@ function Game({ onEnd }: GameProps) {
     requestMotionPermission()
 
     const handleMotion = (event: DeviceMotionEvent) => {
-      if (!motionEnabled) return
+      if (!motionEnabled) {
+        return
+      }
 
       const acceleration = event.accelerationIncludingGravity
       if (acceleration) {
         const tiltX = acceleration.x ?? 0
 
-        playerRef.current.dX += tiltX * 0.05
+        if (Math.abs(tiltX) > 0.5) {
+          keysRef.current.left = tiltX < 0
+          keysRef.current.right = tiltX > 0
+        }
+
+        playerRef.current.dX = tiltX * 1e-2
       }
     }
 
@@ -95,6 +102,7 @@ function Game({ onEnd }: GameProps) {
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
 
+    /*
     const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
       const tiltLR = event.gamma // -90 ~ 90
 
@@ -111,13 +119,14 @@ function Game({ onEnd }: GameProps) {
         }
       }
     }
+    */
 
-    window.addEventListener('deviceorientation', handleDeviceOrientation)
+    // window.addEventListener('deviceorientation', handleDeviceOrientation)
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
-      window.removeEventListener('deviceorientation', handleDeviceOrientation)
+      // window.removeEventListener('deviceorientation', handleDeviceOrientation)
     }
   }, [])
 
