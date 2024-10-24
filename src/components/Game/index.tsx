@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useRef, useState } from 'react'
 import config from 'modules/config'
 import { useCanvasSize, usePlatforms, usePlayer } from 'modules/hooks'
 import styles from './Game.module.scss'
@@ -24,6 +25,51 @@ function Game({ onEnd }: GameProps) {
   const scoreRef = useRef(0)
 
   const hasEndedRef = useRef(false)
+
+  const [motionEnabled, setMotionEnabled] = useState(false)
+
+  useEffect(() => {
+    const requestMotionPermission = async () => {
+      if (
+        typeof DeviceMotionEvent !== 'undefined' &&
+        typeof (DeviceMotionEvent as any).requestPermission === 'function'
+      ) {
+        try {
+          const permission = await (
+            DeviceMotionEvent as any
+          ).requestPermission()
+          if (permission === 'granted') {
+            setMotionEnabled(true)
+          }
+        } catch (error) {
+          console.error('Device motion permission denied:', error)
+        }
+      } else {
+        setMotionEnabled(true)
+      }
+    }
+
+    requestMotionPermission()
+
+    const handleMotion = (event: DeviceMotionEvent) => {
+      if (!motionEnabled) return
+
+      const acceleration = event.accelerationIncludingGravity
+      if (acceleration) {
+        const tiltX = acceleration.x ?? 0
+
+        playerRef.current.dX += tiltX * 0.05
+      }
+    }
+
+    if (motionEnabled) {
+      window.addEventListener('devicemotion', handleMotion)
+    }
+
+    return () => {
+      window.removeEventListener('devicemotion', handleMotion)
+    }
+  }, [motionEnabled, playerRef])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
